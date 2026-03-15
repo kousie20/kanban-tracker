@@ -2,14 +2,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
 
-// Debug: Log initialization
-console.log('App.js loading...');
-console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
+console.log('=== App.js Loading ===');
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://jtienvplopymmvszhopu.supabase.co';
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0aWVudnBsb3B5bW12c3pob3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTg0OTAsImV4cCI6MjA4ODQ3NDQ5MH0.f0ZqAWn_WDa3pJJCcOUsLBmC4lFJy3CQGLzZ6pAcVLk';
 
-console.log('Creating Supabase client...');
+console.log('Supabase URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseKey);
 console.log('Supabase client created');
 
@@ -22,10 +20,8 @@ function App() {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
-  console.log('App component mounted');
-
   useEffect(() => {
-    console.log('Fetching data...');
+    console.log('useEffect triggered, retryCount:', retryCount);
     fetchData();
   }, [retryCount]);
 
@@ -33,27 +29,27 @@ function App() {
     try {
       setError(null);
       setLoading(true);
-      console.log('Starting data fetch...');
+      console.log('Starting fetch...');
       
+      console.log('Fetching projects...');
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
-        .select('*')
-        .order('name');
+        .select('*');
       
-      console.log('Projects response:', { projectData, projectError });
+      console.log('Projects response:', { count: projectData?.length, error: projectError });
       if (projectError) throw projectError;
       setProjects(projectData || []);
 
+      console.log('Fetching tasks...');
       const { data: taskData, error: taskError } = await supabase
         .from('tasks')
-        .select('*')
-        .order('priority');
+        .select('*');
       
-      console.log('Tasks response:', { taskData, taskError });
+      console.log('Tasks response:', { count: taskData?.length, error: taskError });
       if (taskError) throw taskError;
       setTasks(taskData || []);
       
-      console.log('Data fetch complete');
+      console.log('✓ Fetch complete', { projects: projectData?.length, tasks: taskData?.length });
     } catch (err) {
       console.error('Fetch error:', err);
       setError(err.message);
@@ -63,12 +59,12 @@ function App() {
   };
 
   const grouped = useMemo(() => {
+    console.log('Grouping tasks...', { taskCount: tasks.length });
     const result = {};
     statusOrder.forEach(status => {
-      result[status] = tasks.filter(t => 
-        t.status.toLowerCase() === status.toLowerCase()
-      );
+      result[status] = tasks.filter(t => t.status === status);
     });
+    console.log('Grouped:', Object.fromEntries(Object.entries(result).map(([k, v]) => [k, v.length])));
     return result;
   }, [tasks]);
 
@@ -86,7 +82,7 @@ function App() {
     return colors[priority] || '#999';
   };
 
-  console.log('Render state:', { loading, error, projectCount: projects.length, taskCount: tasks.length });
+  console.log('Render:', { loading, error, projects: projects.length, tasks: tasks.length });
 
   if (error) {
     return (
@@ -108,7 +104,7 @@ function App() {
     <div className="app">
       <header className="header">
         <h1>⚡ JARVIS Project Tracker</h1>
-        <p>Track all work in one view</p>
+        <p>{tasks.length} tasks across {projects.length} projects</p>
       </header>
 
       <div className="kanban-board">
