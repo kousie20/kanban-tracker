@@ -36,7 +36,7 @@ function App() {
       console.log('Starting data fetch...');
       
       const { data: projectData, error: projectError } = await supabase
-        .from('jarvis.projects')
+        .from('projects')
         .select('*')
         .order('name');
       
@@ -45,7 +45,7 @@ function App() {
       setProjects(projectData || []);
 
       const { data: taskData, error: taskError } = await supabase
-        .from('jarvis.tasks')
+        .from('tasks')
         .select('*')
         .order('priority');
       
