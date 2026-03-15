@@ -8,8 +8,10 @@ const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://jtienvplopymm
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0aWVudnBsb3B5bW12c3pob3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTg0OTAsImV4cCI6MjA4ODQ3NDQ5MH0.f0ZqAWn_WDa3pJJCcOUsLBmC4lFJy3CQGLzZ6pAcVLk';
 
 console.log('Supabase URL:', supabaseUrl);
-const supabase = createClient(supabaseUrl, supabaseKey);
-console.log('Supabase client created');
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  db: { schema: 'jarvis' }
+});
+console.log('Supabase client created (schema: jarvis)');
 
 const statusOrder = ['Backlog', 'To Do', 'In Progress', 'Review', 'Done', 'On Hold'];
 
