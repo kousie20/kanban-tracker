@@ -2,15 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import './App.css';
 
-// Now uses environment variables (NOT hardcoded)
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+// Debug: Log initialization
+console.log('App.js loading...');
+console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase credentials in .env.local');
-}
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://jtienvplopymmvszhopu.supabase.co';
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0aWVudnBsb3B5bW12c3pob3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4OTg0OTAsImV4cCI6MjA4ODQ3NDQ5MH0.f0ZqAWn_WDa3pJJCcOUsLBmC4lFJy3CQGLzZ6pAcVLk';
 
+console.log('Creating Supabase client...');
 const supabase = createClient(supabaseUrl, supabaseKey);
+console.log('Supabase client created');
+
 const statusOrder = ['Backlog', 'To Do', 'In Progress', 'Review', 'Done', 'On Hold'];
 
 function App() {
@@ -20,7 +22,10 @@ function App() {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
+  console.log('App component mounted');
+
   useEffect(() => {
+    console.log('Fetching data...');
     fetchData();
   }, [retryCount]);
 
@@ -28,25 +33,30 @@ function App() {
     try {
       setError(null);
       setLoading(true);
+      console.log('Starting data fetch...');
       
       const { data: projectData, error: projectError } = await supabase
-        .from('projects')
+        .from('jarvis.projects')
         .select('*')
         .order('name');
       
+      console.log('Projects response:', { projectData, projectError });
       if (projectError) throw projectError;
       setProjects(projectData || []);
 
       const { data: taskData, error: taskError } = await supabase
-        .from('tasks')
+        .from('jarvis.tasks')
         .select('*')
         .order('priority');
       
+      console.log('Tasks response:', { taskData, taskError });
       if (taskError) throw taskError;
       setTasks(taskData || []);
+      
+      console.log('Data fetch complete');
     } catch (err) {
+      console.error('Fetch error:', err);
       setError(err.message);
-      console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
     }
@@ -76,9 +86,11 @@ function App() {
     return colors[priority] || '#999';
   };
 
+  console.log('Render state:', { loading, error, projectCount: projects.length, taskCount: tasks.length });
+
   if (error) {
     return (
-      <div className="error-container">
+      <div className="error-container" style={{ padding: '20px', color: '#fff' }}>
         <h2>⚠️ Error Loading Kanban Board</h2>
         <p>{error}</p>
         <button onClick={() => setRetryCount(prev => prev + 1)} className="retry-button">
@@ -89,7 +101,7 @@ function App() {
   }
 
   if (loading) {
-    return <div className="loading">⏳ Loading Kanban Board...</div>;
+    return <div className="loading" style={{ color: '#fff', padding: '20px' }}>⏳ Loading Kanban Board...</div>;
   }
 
   return (
