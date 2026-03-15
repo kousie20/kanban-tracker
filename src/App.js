@@ -31,18 +31,18 @@ function App() {
       setLoading(true);
       console.log('Starting fetch...');
       
-      console.log('Fetching projects...');
+      console.log('Fetching projects from jarvis schema...');
       const { data: projectData, error: projectError } = await supabase
-        .from('projects')
+        .from('jarvis.projects')
         .select('*');
       
       console.log('Projects response:', { count: projectData?.length, error: projectError });
       if (projectError) throw projectError;
       setProjects(projectData || []);
 
-      console.log('Fetching tasks...');
+      console.log('Fetching tasks from jarvis schema...');
       const { data: taskData, error: taskError } = await supabase
-        .from('tasks')
+        .from('jarvis.tasks')
         .select('*');
       
       console.log('Tasks response:', { count: taskData?.length, error: taskError });
